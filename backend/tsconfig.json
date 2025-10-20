@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    // -------------------------
+    // File Layout
+    // -------------------------
+    "rootDir": "./src",        // source .ts files live here
+    "outDir": "./dist",        // compiled JS goes here
+
+    // -------------------------
+    // Environment Settings
+    // -------------------------
+    "target": "ES2020",        // output JS version
+    "module": "commonjs",      // Node.js uses CommonJS modules
+    "moduleResolution": "node",// resolve imports like Node.js
+    "esModuleInterop": true,   // allows `import express from "express"` instead of require
+    "forceConsistentCasingInFileNames": true, // prevent casing mismatches
+    "skipLibCheck": true,      // skip type checking of node_modules
+
+    // -------------------------
+    // Strict Typechecking
+    // -------------------------
+    "strict": true,                 // enable all strict mode options
+    "noUncheckedIndexedAccess": true, // safer access for objects/arrays
+    "exactOptionalPropertyTypes": true, // optional props must match exactly
+
+    // -------------------------
+    // Useful options for debugging
+    // -------------------------
+    "sourceMap": true,           // generate .map files for debugging
+    "declaration": true,         // generate .d.ts declaration files
+    "declarationMap": true,      // map declarations back to TS
+
+    // -------------------------
+    // Type definitions
+    // -------------------------
+    "types": ["node"],           // include Node.js types
+    "lib": ["es2020"]            // include ES2020 built-ins
+  }
+}
