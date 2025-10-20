@@ -1,7 +1,9 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import http from "http";
 import cors from "cors";
 import { Server as SocketIOServer } from "socket.io";
+import { tasksRouter } from "./routes/tasksRoutes";
+import { queueService } from "./controllers/tasksController";
 
 const PORT = 3000;
 const app = express();
@@ -10,14 +12,16 @@ const app = express();
 app.use(cors()); // allow frontend requests
 app.use(express.json()); // parse JSON body
 
-// API route (placeholder)
-app.get("/api/tasks", (_req: Request, res: Response) => {
-  res.json([]); // todo
-});
+app.use("/api/tasks", tasksRouter);
 
 // Health check
 app.get("/health", (_req: Request, res: Response) => {
   res.json({ ok: true });
+});
+
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("Unhandled error:", err);
+  res.status(err?.status || 500).json({ error: err?.message || "Internal Server Error" });
 });
 
 // Create HTTP server for Socket.IO
@@ -33,14 +37,28 @@ const io = new SocketIOServer(server, {
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 
-  socket.on("join_queue", () => {
-    socket.emit("queue_update", { queue: [], completed: [] });
+  // Client must send "join_queue" event if it wants real-time queue data
+  socket.on("join_queue", async () => {
+    // We fetch current data from QueueService (queue + completed)
+    const q = await queueService.getQueue();
+    const completed = await queueService.getCompleted();
+
+    // Then we send that snapshot back ONLY to that one socket
+    socket.emit("queue_update", {
+      queue: q.map((t) => ({ ...t, createdAt: t.createdAt.toISOString() })),
+      completed: completed.map((t) => ({ ...t, createdAt: t.createdAt.toISOString() })),
+    });
   });
 
   socket.on("disconnect", (reason) => {
     console.log("Socket disconnected:", socket.id, reason);
   });
 });
+
+queueService.on("queue_changed", (payload) => io.emit("queue_update", payload));
+queueService.on("task_progress", (task) => io.emit("task_progress", task));
+queueService.on("task_completed", (task) => io.emit("task_completed", task));
+
 
 // Start server
 server.listen(PORT, () => {
