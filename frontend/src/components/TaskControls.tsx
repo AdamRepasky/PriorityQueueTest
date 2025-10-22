@@ -56,7 +56,7 @@ export default function TaskControls({ onAfterChange }: Props) {
       <div className="row g-3 align-items-end">
 
         <div className="col-md-5">
-          <label className="form-label">Task Nameeee</label>
+          <label className="form-label">Task Name</label>
           <input
             className="form-control"
             placeholder="Enter name"
@@ -66,7 +66,7 @@ export default function TaskControls({ onAfterChange }: Props) {
           />
         </div>
 
-        <div className="col-md-3">
+        <div className="col-md-2">
           <label className="form-label">Priority</label>
           <input
             className="form-control"
@@ -80,18 +80,18 @@ export default function TaskControls({ onAfterChange }: Props) {
 
         <div className="col-md-2">
           <button className="btn btn-primary w-100" type="submit" disabled={loading}>
-            {loading ? "Adding…" : "Add"}
+            Add
           </button>
         </div>
 
-        <div className="col-md-2 text-end">
+        <div className="col-md-3 text-end">
           <button
             type="button"
-            className="btn btn-outline-danger w-100"
+            className="btn btn-outline-danger w-100 nowrap"
             disabled={clearing}
             onClick={handleClear}
           >
-            {clearing ? "Clearing…" : "Clear Completed"}
+            Clear Completed
           </button>
         </div>
       </div>

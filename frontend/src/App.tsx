@@ -10,8 +10,8 @@ export default function App() {
   const currentTask = queue.find((t) => t.id === currentTaskId) || null;
 
   return (
-    <div className="container my-4">
-      <h1 className="mb-4">Task Queue</h1>
+    <div className="container my-4" style={{ maxWidth: 1000 }}>
+      <h1 className="text-center mb-4">Task Queue</h1>
 
       <TaskControls onAfterChange={refresh} />
 

@@ -10,18 +10,18 @@ interface TaskListProps {
 
 const TaskList: React.FC<TaskListProps> = ({ currentTask, queuedTasks, completedTasks }) => {
   return (
-    <div className="mb-4">
+    <div className="mb-4 queue-container text-center">
       {/* Current Task */}
       <div className="mb-4">
         <h3>Currently Processing</h3>
-        {currentTask && (<TaskItem task={currentTask} isCurrent />)}
+        {currentTask ? (<TaskItem task={currentTask} isCurrent />) : <p>No task running.</p>}
       </div>
 
       {/* Queue */}
       <div className="mb-4">
         <h3>Queue (by priority)</h3>
         {queuedTasks.length === 0 ? (
-          <p className="text-muted">No tasks in queue</p>
+          <p>No tasks in queue</p>
         ) : (
           queuedTasks.map((task) => <TaskItem key={task.id} task={task} />)
         )}
@@ -31,7 +31,7 @@ const TaskList: React.FC<TaskListProps> = ({ currentTask, queuedTasks, completed
       <div className="mb-4">
         <h3>Completed Tasks</h3>
         {completedTasks.length === 0 ? (
-          <p className="text-muted">No completed tasks</p>
+          <p>No completed tasks</p>
         ) : (
           completedTasks.map((task) => <TaskItem key={task.id} task={task} />)
         )}

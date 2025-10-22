@@ -1,49 +1,68 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+/* DARK MODE GLOBAL STYLES */
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
+  background: #121212;
+  color: #e3e3e3;
+  font-family: 'Montserrat', sans-serif;
+
+  /* center app content */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+}
+.text-center {
+  text-align: center; /* center all text inside this container */
+}
+.queue-container p {
+  color: #4f4f4f; /* nice readable gray */
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.task-text-gray {
+  color: #787878; /* gray like bootstrap muted */
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Bootstrap overrides */
+.card, .form-control, .progress, .bg-light {
+  background-color: #1e1e1e !important;
+  color: #e3e3e3 !important;
+  border-color: #333 !important;
+}
+.btn {
+  background-color: #3a3a3a !important;
+  color: #e3e3e3 !important;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.form-control {
+  background-color: #2a2a2a !important;
+}
+
+.form-control::placeholder {
+  color: #6c6c6c; 
+  opacity: 1;
+}
+
+/* Progress bar transition */
+.progress-bar {
+  transition: width 1.2s ease-in-out;
+}
+
+/* Pulse animation for current task */
+.is-current-pulse {
+  animation: pulseGlow 1.2s ease-in-out infinite;
+  border: 1px solid #00ddff !important;
+}
+
+@keyframes pulseGlow {
+  0%   { box-shadow: 0 0 4px #00ddff; }
+  50%  { box-shadow: 0 0 14px #00ddff; }
+  100% { box-shadow: 0 0 4px #00ddff; }
+}
+
+/* Headings */
+h1, h3 {
+  color: #ffffff;
 }
