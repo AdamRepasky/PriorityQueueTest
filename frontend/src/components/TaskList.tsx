@@ -5,16 +5,19 @@ import TaskItem from "./TaskItem";
 interface TaskListProps {
   tasks: TaskDTO[];
   title?: string;
+  highlightFirst?: boolean;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, title }) => {
+const TaskList: React.FC<TaskListProps> = ({ tasks, highlightFirst = true }) => {
   return (
     <div className="mb-4">
-      {title && <h3 className="mb-3">{title}</h3>}
       {tasks.length === 0 ? (
-        <p>No tasks</p>
+        <p className="text-muted">No tasks</p>
       ) : (
-        tasks.map((task) => <TaskItem key={task.id} task={task} />)
+        tasks.map((task, idx) => {
+          const isCurrent = highlightFirst && idx === 0 && task.progress < 100;
+          return <TaskItem key={task.id} task={task} isCurrent={isCurrent} />;
+        })
       )}
     </div>
   );

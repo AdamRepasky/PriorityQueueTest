@@ -34,7 +34,10 @@ export default function App() {
         <div className="mb-3">Loading tasks…</div>
       ) : (
         <>
-          <TaskList tasks={queue} title="Queue" />
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h3 className="mb-0">Queue</h3>
+          </div>
+          <TaskList tasks={queue} highlightFirst={true} />
           <hr />
           <div className="d-flex justify-content-between align-items-center mb-2">
             <h3 className="mb-0">Completed Tasks</h3>
@@ -45,7 +48,7 @@ export default function App() {
             </div>
           </div>
           {error && <div className="text-danger mb-2">{error}</div>}
-          <TaskList tasks={completed} />
+          <TaskList tasks={completed} highlightFirst={false} />
         </>
       )}
     </div>
