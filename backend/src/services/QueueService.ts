@@ -138,11 +138,16 @@ export class QueueService extends EventEmitter {
     }
   }
 
-  /** Emits snapshot of queue + completed tasks */
+  /** Emits snapshot of queue + completed tasks (queue is SORTED by effectivePriority) */
   private emitQueueChanged() {
+    // compute a sorted snapshot (highest effective priority first)
+    const sorted = this.tasks
+      .slice()
+      .sort((a, b) => this.effectivePriority(b) - this.effectivePriority(a));
+
     this.emit("queue_changed", {
-      queue: this.tasks.map(toDTO),
-      completed: this.completed.map(toDTO),
+      queue: sorted.map(toDTO),
+      completed: this.completed.slice().map(toDTO),
     });
   }
 }
