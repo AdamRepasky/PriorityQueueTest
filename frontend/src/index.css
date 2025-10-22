@@ -19,6 +19,10 @@ body {
   color: #4f4f4f; /* nice readable gray */
 }
 
+.min-height-task {
+  min-height: 100px; /* adjust until it matches your TaskItem height */
+}
+
 .task-text-gray {
   color: #787878; /* gray like bootstrap muted */
 }
