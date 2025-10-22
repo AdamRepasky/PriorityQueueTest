@@ -3,22 +3,39 @@ import type { TaskDTO } from "../types/Task";
 import TaskItem from "./TaskItem";
 
 interface TaskListProps {
-  tasks: TaskDTO[];
-  title?: string;
-  highlightFirst?: boolean;
+  currentTask?: TaskDTO | null;
+  queuedTasks: TaskDTO[];
+  completedTasks: TaskDTO[];
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, highlightFirst = true }) => {
+const TaskList: React.FC<TaskListProps> = ({ currentTask, queuedTasks, completedTasks }) => {
   return (
     <div className="mb-4">
-      {tasks.length === 0 ? (
-        <p className="text-muted">No tasks</p>
-      ) : (
-        tasks.map((task, idx) => {
-          const isCurrent = highlightFirst && idx === 0 && task.progress < 100;
-          return <TaskItem key={task.id} task={task} isCurrent={isCurrent} />;
-        })
-      )}
+      {/* Current Task */}
+      <div className="mb-4">
+        <h3>Currently Processing</h3>
+        {currentTask && (<TaskItem task={currentTask} isCurrent />)}
+      </div>
+
+      {/* Queue */}
+      <div className="mb-4">
+        <h3>Queue (by priority)</h3>
+        {queuedTasks.length === 0 ? (
+          <p className="text-muted">No tasks in queue</p>
+        ) : (
+          queuedTasks.map((task) => <TaskItem key={task.id} task={task} />)
+        )}
+      </div>
+
+      {/* Completed */}
+      <div className="mb-4">
+        <h3>Completed Tasks</h3>
+        {completedTasks.length === 0 ? (
+          <p className="text-muted">No completed tasks</p>
+        ) : (
+          completedTasks.map((task) => <TaskItem key={task.id} task={task} />)
+        )}
+      </div>
     </div>
   );
 };

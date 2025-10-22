@@ -6,7 +6,7 @@ import AddTaskForm from "./components/AddTaskForm";
 import { clearCompleted } from "./services/api";
 
 export default function App() {
-  const { queue, completed, loading, refresh } = useQueue();
+  const { queue, completed, currentTaskId, loading, refresh } = useQueue();
   const [clearing, setClearing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +24,9 @@ export default function App() {
     }
   };
 
+  const queuedOnly = currentTaskId ? queue.filter((t) => t.id !== currentTaskId) : queue;
+  const currentTask = queue.find((t) => t.id === currentTaskId) || null;
+
   return (
     <div className="container my-4">
       <h1 className="mb-4">Task Queue</h1>
@@ -35,20 +38,19 @@ export default function App() {
       ) : (
         <>
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <h3 className="mb-0">Queue</h3>
-          </div>
-          <TaskList tasks={queue} highlightFirst={true} />
-          <hr />
-          <div className="d-flex justify-content-between align-items-center mb-2">
-            <h3 className="mb-0">Completed Tasks</h3>
             <div>
               <button className="btn btn-sm btn-danger me-2" onClick={handleClear} disabled={clearing}>
                 {clearing ? "Clearing…" : "Clear completed"}
               </button>
             </div>
           </div>
+          <hr />
           {error && <div className="text-danger mb-2">{error}</div>}
-          <TaskList tasks={completed} highlightFirst={false} />
+          <TaskList
+            currentTask={currentTask}
+            queuedTasks={queuedOnly}
+            completedTasks={completed}
+          />
         </>
       )}
     </div>

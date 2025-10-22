@@ -22,6 +22,7 @@ export class QueueService extends EventEmitter {
   private tickIntervalMs = 5000;      // process queue every 5 seconds
   //private tickHandle?: NodeJS.Timeout;
   private tickHandle: NodeJS.Timeout | undefined;
+  private currentTaskId: string | null = null;
 
   constructor() {
     super();
@@ -70,52 +71,74 @@ export class QueueService extends EventEmitter {
 
   /**
    * One tick of processing:
-   *  - find highest effective priority task
+   *  - use current task, find highest effective priority task if currentTaskTd == null
    *  - increase progress 10–20%
    *  - if progress >= 100 → move to completed
    */
   public async processTick(): Promise<void> {
-    if (this.tasks.length === 0) return;
+    while (this.tasks.length > 0) {
+      let task: Task;
 
-    // sort a copy by effective priority
-    const sorted = this.tasks.slice().sort((a, b) => this.effectivePriority(b) - this.effectivePriority(a));
-    const current = sorted[0];
-    if (!current) return;
+      // pick current task if exists, else pick highest priority
+      if (!this.currentTaskId) {
+        const sorted = this.tasks
+          .slice()
+          .sort((a, b) => this.effectivePriority(b) - this.effectivePriority(a));
+        task = sorted[0]!;
+        this.currentTaskId = task.id;
+      } else {
+        const idx = this.tasks.findIndex((t) => t.id === this.currentTaskId);
+        if (idx === -1) {
+          // current task disappeared, pick new highest priority
+          const sorted = this.tasks
+            .slice()
+            .sort((a, b) => this.effectivePriority(b) - this.effectivePriority(a));
+          task = sorted[0]!;
+          this.currentTaskId = task.id;
+        } else {
+          task = this.tasks[idx]!;
+        }
+      }
 
-    // find index of task in original array
-    const idx = this.tasks.findIndex((t) => t.id === current.id);
-    if (idx === -1) return;       // TS happy: index may not exist
+      // if for any reason already completed, move it to completed and pick new task
+      if (task.progress >= 100) {
+        const idx = this.tasks.findIndex((t) => t.id === task.id);
+        if (idx !== -1) {
+          const finished = this.tasks.splice(idx, 1)[0];
+          if (finished) {
+            this.completed.push(finished);
+            this.emit("task_completed", toDTO(finished));
+          }
+        }
+        this.currentTaskId = null; // pick a new task in the same tick
+        this.emitQueueChanged();
+        continue; // continue to process the next task
+      }
+      
+      // increase progress randomly 10–20%
+      const inc = Math.floor(Math.random() * 11) + 10;
+      task.progress = Math.min(100, task.progress + inc);
 
-    const task = this.tasks[idx];
-    if (!task) return;             // TS happy: task is now definitely defined
+      this.emit("task_progress", toDTO(task));
+      this.emitQueueChanged();
 
-    // if already completed, move it
-    if (task.progress >= 100) {
-      const finished = this.tasks.splice(idx, 1)[0]; // safe: idx exists
-      if (finished) {
-        this.completed.push(finished);
-        this.emit("task_completed", toDTO(finished));
+      // if task completed now
+      if (task.progress >= 100) {
+        const idx = this.tasks.findIndex((t) => t.id === task.id);
+        if (idx !== -1) {
+          const finished = this.tasks.splice(idx, 1)[0];
+          if (finished) {
+            this.completed.push(finished);
+            this.emit("task_completed", toDTO(finished));
+          }
+        }
+        this.currentTaskId = null; // pick a new task in the next tick
         this.emitQueueChanged();
       }
-      return;
+
+      // only one task processed per tick
+      break;
     }
-
-    // increase progress randomly 10–20%
-    const inc = Math.floor(Math.random() * 11) + 10; // 10..20
-    task.progress = Math.min(100, task.progress + inc);
-
-    this.emit("task_progress", toDTO(task));
-
-    // if task completed now
-    if (task.progress >= 100) {
-      const finished = this.tasks.splice(idx, 1)[0]; // safe: idx exists
-      if (finished) {
-        this.completed.push(finished);
-        this.emit("task_completed", toDTO(finished));
-      }
-    }
-
-    this.emitQueueChanged();
   }
 
   /** Start interval processing */
@@ -146,6 +169,7 @@ export class QueueService extends EventEmitter {
       .sort((a, b) => this.effectivePriority(b) - this.effectivePriority(a));
 
     this.emit("queue_changed", {
+      currentTaskId: this.currentTaskId,
       queue: sorted.map(toDTO),
       completed: this.completed.slice().map(toDTO),
     });

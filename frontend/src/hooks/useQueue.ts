@@ -6,6 +6,7 @@ import { io, Socket } from "socket.io-client";
 
 export function useQueue() {
   const [queue, setQueue] = useState<TaskDTO[]>([]);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const [completed, setCompleted] = useState<TaskDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -36,13 +37,15 @@ export function useQueue() {
     });
 
     // Listen for full queue updates
-    s.on("queue_update", (payload: { queue: TaskDTO[]; completed: TaskDTO[] }) => {
+    s.on("queue_update", (payload: { currentTaskId: string | null; queue: TaskDTO[]; completed: TaskDTO[] }) => {
+      setCurrentTaskId(payload.currentTaskId);
       setQueue(payload.queue);
       setCompleted(payload.completed);
     });
 
     // Listen for task progress
     s.on("task_progress", (task: TaskDTO) => {
+      console.log("Task progress received for task:", task.id);
       setQueue((prev) =>
         prev.map((t) => (t.id === task.id ? task : t))
       );
@@ -50,6 +53,8 @@ export function useQueue() {
 
     // Listen for task completed
     s.on("task_completed", (task: TaskDTO) => {
+      console.log("Task completed received for task:", task.id);
+      setCurrentTaskId(null);
       setQueue((prev) => prev.filter((t) => t.id !== task.id));
       setCompleted((prev) => [task, ...prev]);
     });
@@ -59,5 +64,5 @@ export function useQueue() {
     };
   }, []);
 
-  return { queue, completed, loading, refresh };
+  return { queue, completed, currentTaskId, loading, refresh };
 }
