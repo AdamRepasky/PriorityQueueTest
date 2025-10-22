@@ -39,7 +39,7 @@ export class QueueService extends EventEmitter {
       createdAt: new Date(),
     };
     this.tasks.push(task);
-    this.emitQueueChanged();
+    await this.emitQueueChanged();
     return task;
   }
 
@@ -60,7 +60,7 @@ export class QueueService extends EventEmitter {
   /** Clears completed tasks */
   public async clearCompleted(): Promise<void> {
     this.completed = [];
-    this.emitQueueChanged();
+    await this.emitQueueChanged();
   }
 
   /** Computes effective priority with aging */
@@ -111,7 +111,7 @@ export class QueueService extends EventEmitter {
           }
         }
         this.currentTaskId = null; // pick a new task in the same tick
-        this.emitQueueChanged();
+        await this.emitQueueChanged();
         continue; // continue to process the next task
       }
       
@@ -120,7 +120,7 @@ export class QueueService extends EventEmitter {
       task.progress = Math.min(100, task.progress + inc);
 
       this.emit("task_progress", toDTO(task));
-      this.emitQueueChanged();
+      await this.emitQueueChanged();
 
       // if task completed now
       if (task.progress >= 100) {
@@ -133,7 +133,7 @@ export class QueueService extends EventEmitter {
           }
         }
         this.currentTaskId = null; // pick a new task in the next tick
-        this.emitQueueChanged();
+        await this.emitQueueChanged();
       }
 
       // only one task processed per tick
@@ -162,16 +162,13 @@ export class QueueService extends EventEmitter {
   }
 
   /** Emits snapshot of queue + completed tasks (queue is SORTED by effectivePriority) */
-  private emitQueueChanged() {
-    // compute a sorted snapshot (highest effective priority first)
-    const sorted = this.tasks
-      .slice()
-      .sort((a, b) => this.effectivePriority(b) - this.effectivePriority(a));
-
+  private async emitQueueChanged() {
+    const sorted = await this.getQueue();
+    const sortedCompleted = await this.getCompleted();
     this.emit("queue_changed", {
       currentTaskId: this.currentTaskId,
       queue: sorted.map(toDTO),
-      completed: this.completed.slice().map(toDTO),
+      completed: sortedCompleted.map(toDTO),
     });
   }
 }
