@@ -2,14 +2,14 @@
 import { useState, useEffect } from "react";
 import type { TaskDTO } from "../types/Task";
 import { fetchQueue, fetchCompleted } from "../services/api";
-import { io, Socket } from "socket.io-client";
+import { io /*, Socket*/ } from "socket.io-client";
 
 export function useQueue() {
   const [queue, setQueue] = useState<TaskDTO[]>([]);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const [completed, setCompleted] = useState<TaskDTO[]>([]);
   const [loading, setLoading] = useState(true);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  //const [socket, setSocket] = useState<Socket | null>(null);
 
   // Initial fetch
   const refresh = async () => {
@@ -29,7 +29,7 @@ export function useQueue() {
 
     // Connect to backend via WebSocket
     const s = io("http://localhost:3000");
-    setSocket(s);
+    //setSocket(s);
 
     s.on("connect", () => {
       console.log("Connected to WebSocket:", s.id);
