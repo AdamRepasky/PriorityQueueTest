@@ -1,3 +1,4 @@
+// src/hooks/useShowLoader.ts
 import { useEffect, useState } from "react";
 
 export function useShowLoader(loading: boolean, minDuration = 1000) {
