@@ -163,11 +163,11 @@ export class QueueService extends EventEmitter {
 
   /** Emits snapshot of queue + completed tasks (queue is SORTED by effectivePriority) */
   private async emitQueueChanged() {
-    const sorted = await this.getQueue();
+    const sortedQueue = await this.getQueue();
     const sortedCompleted = await this.getCompleted();
     this.emit("queue_changed", {
       currentTaskId: this.currentTaskId,
-      queue: sorted.map(toDTO),
+      queue: sortedQueue.map(toDTO),
       completed: sortedCompleted.map(toDTO),
     });
   }
